@@ -1,0 +1,30 @@
+{
+  "name": "lnd-express-lnservice-api",
+  "version": "1.0.0",
+  "description": "An Express.js backend server to interact with an LND Lightning node using the 'ln-service' package.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "keywords": [
+    "lightning",
+    "lnd",
+    "express",
+    "api",
+    "bitcoin",
+    "ln-service"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^4.21.2",
+    "ln-service": "^57.25.2",
+    "qrcode": "^1.5.4"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}

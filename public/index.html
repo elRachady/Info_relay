@@ -1,0 +1,1705 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>InfoRelay Alertes communautaires vérifiées</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    :root {
+      /* Palette noir/vert/orange */
+      --primary-color: #00FF7F; /* Vert néon Bitcoin */
+      --secondary-color: #FF9900; /* Orange vif */
+      --accent-color: #00FF7F; /* Vert pour accents */
+      --danger-color: #FF4D4D;
+      --warning-color: #FF9900;
+      --info-color: #00BFFF;
+      
+      /* Couleurs de base */
+      --dark-color: #121212;
+      --darker-color: #0A0A0A;
+      --light-color: #F8F8F8;
+      --gray-color: #2A2A2A;
+      --medium-gray: #1E1E1E;
+      
+      /* Texte */
+      --text-color: #E0E0E0;
+      --text-light: #A0A0A0;
+      
+      /* Effets */
+      --shadow: 0 4px 15px rgba(0, 255, 127, 0.15);
+      --glow: 0 0 10px rgba(0, 255, 127, 0.7);
+      --border-radius: 12px;
+      --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      display: grid;
+      grid-template-areas:
+        "topbar topbar"
+        "menu content"
+        "footer footer";
+      grid-template-columns: 250px 1fr;
+      grid-template-rows: 60px 1fr auto;
+      min-height: 100vh;
+      font-family: 'Inter', sans-serif;
+      background-color: var(--dark-color);
+      color: var(--text-color);
+    }
+
+    /* Top Bar */
+    .top-bar {
+      grid-area: topbar;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 20px;
+      background-color: var(--darker-color);
+      border-bottom: 1px solid var(--gray-color);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .search-bar {
+      display: flex;
+      align-items: center;
+      background-color: var(--medium-gray);
+      border-radius: var(--border-radius);
+      padding: 8px 15px;
+      width: 400px;
+      max-width: 50%;
+    }
+
+    .search-bar i {
+      color: var(--text-light);
+      margin-right: 10px;
+    }
+
+    .search-bar input {
+      background: transparent;
+      border: none;
+      color: var(--text-color);
+      width: 100%;
+      outline: none;
+    }
+
+    .user-actions {
+      display: flex;
+      gap: 15px;
+    }
+
+    .icon-btn {
+      background: none;
+      border: none;
+      color: var(--text-light);
+      font-size: 18px;
+      cursor: pointer;
+      position: relative;
+      transition: var(--transition);
+    }
+
+    .icon-btn:hover {
+      color: var(--primary-color);
+    }
+
+    .badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background-color: var(--danger-color);
+      color: white;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      font-size: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Side Menu */
+    .side-menu {
+      grid-area: menu;
+      background-color: var(--darker-color);
+      border-right: 1px solid var(--gray-color);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .menu-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--gray-color);
+    }
+
+    .menu-header h1 {
+      color: var(--primary-color);
+      font-size: 1.5rem;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .menu-items {
+      list-style: none;
+      padding: 0;
+      margin: 20px 0;
+      flex-grow: 1;
+    }
+
+    .menu-items li {
+      margin: 5px 0;
+    }
+
+    .menu-items a {
+      display: flex;
+      align-items: center;
+      padding: 12px 20px;
+      color: var(--text-light);
+      text-decoration: none;
+      transition: var(--transition);
+    }
+
+    .menu-items a:hover {
+      background-color: rgba(0, 255, 127, 0.1);
+      color: var(--primary-color);
+    }
+
+    .menu-items a i {
+      width: 24px;
+      text-align: center;
+      margin-right: 12px;
+    }
+
+    .menu-items .active a {
+      background-color: rgba(0, 255, 127, 0.2);
+      color: var(--primary-color);
+      border-left: 3px solid var(--primary-color);
+    }
+
+    .menu-footer {
+      padding: 20px;
+      border-top: 1px solid var(--gray-color);
+    }
+
+    /* Main Content */
+    .main-content {
+      grid-area: content;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .app-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+      animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .page-header h2 {
+      color: var(--primary-color);
+      font-size: 1.3rem;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border: none;
+      border-radius: var(--border-radius);
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      text-decoration: none;
+    }
+
+    .btn i {
+      font-size: 14px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-color);
+      color: var(--dark-color);
+      box-shadow: 0 0 15px rgba(0, 255, 127, 0.4);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 20px rgba(0, 255, 127, 0.6);
+    }
+
+    .btn-secondary {
+      background-color: var(--secondary-color);
+      color: var(--dark-color);
+      box-shadow: 0 0 15px rgba(255, 153, 0, 0.4);
+    }
+
+    .btn-secondary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 20px rgba(255, 153, 0, 0.6);
+    }
+
+    .btn-back {
+      background-color: transparent;
+      color: var(--primary-color);
+      padding: 8px 12px;
+      margin-bottom: 15px;
+      border: 1px solid var(--primary-color);
+    }
+
+    .btn-back:hover {
+      background-color: rgba(0, 255, 127, 0.1);
+    }
+
+    .btn-block {
+      display: block;
+      width: 100%;
+    }
+
+    /* Alert Cards */
+    .alerts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .alert-card {
+      background-color: var(--medium-gray);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      transition: var(--transition);
+      border: 1px solid var(--gray-color);
+    }
+
+    .alert-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 12px rgba(0, 255, 127, 0.3);
+    }
+
+    .alert-card.urgent {
+      border-left: 5px solid var(--danger-color);
+    }
+
+    .alert-card.warning {
+      border-left: 5px solid var(--warning-color);
+    }
+
+    .alert-card.info {
+      border-left: 5px solid var(--info-color);
+    }
+
+    .alert-header {
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      border-bottom: 1px solid var(--gray-color);
+      background-color: rgba(0, 0, 0, 0.2);
+    }
+
+    .alert-icon {
+      font-size: 24px;
+      margin-right: 12px;
+      color: var(--primary-color);
+    }
+
+    .alert-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-color);
+      flex: 1;
+    }
+
+    .alert-body {
+      padding: 15px;
+      background-color: var(--darker-color);
+    }
+
+    .alert-detail {
+      display: flex;
+      margin-bottom: 8px;
+    }
+
+    .alert-detail i {
+      width: 24px;
+      color: var(--primary-color);
+    }
+
+    .alert-detail span {
+      flex: 1;
+      color: var(--text-light);
+    }
+
+    .alert-footer {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 15px;
+      border-top: 1px solid var(--gray-color);
+      background-color: rgba(0, 0, 0, 0.3);
+    }
+
+    /* Forms */
+    .alert-form {
+      background-color: var(--medium-gray);
+      padding: 25px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 30px;
+      border: 1px solid var(--gray-color);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--gray-color);
+      border-radius: var(--border-radius);
+      font-size: 16px;
+      transition: var(--transition);
+      background-color: var(--darker-color);
+      color: var(--text-color);
+    }
+
+    .form-group textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px rgba(0, 255, 127, 0.3);
+    }
+
+    /* Alert Result */
+    .alert-result {
+      background-color: var(--medium-gray);
+      padding: 25px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--gray-color);
+    }
+
+    .result-details {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 30px;
+    }
+
+    .qr-container {
+      flex: 1;
+      min-width: 250px;
+      text-align: center;
+      background-color: var(--darker-color);
+      padding: 20px;
+      border-radius: var(--border-radius);
+      border: 1px solid var(--gray-color);
+    }
+
+    .qr-container img {
+      width: 200px;
+      height: 200px;
+      margin: 15px 0;
+      border: 1px solid var(--gray-color);
+      padding: 10px;
+      border-radius: 8px;
+      background: white;
+    }
+
+    .hash-details {
+      flex: 2;
+      min-width: 250px;
+      background-color: var(--darker-color);
+      padding: 20px;
+      border-radius: var(--border-radius);
+      border: 1px solid var(--gray-color);
+    }
+
+    .tech-detail {
+      margin-bottom: 15px;
+    }
+
+    .tech-detail label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+      color: var(--primary-color);
+    }
+
+    .tech-detail textarea {
+      width: 100%;
+      height: 60px;
+      padding: 8px;
+      border: 1px solid var(--gray-color);
+      border-radius: 4px;
+      font-family: monospace;
+      resize: none;
+      background-color: var(--dark-color);
+      color: var(--primary-color);
+    }
+
+    .btn-copy {
+      background: var(--secondary-color);
+      color: var(--dark-color);
+      border: none;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 5px;
+      transition: var(--transition);
+    }
+
+    .btn-copy:hover {
+      background: var(--primary-color);
+    }
+
+    /* Verification */
+    .verify-options {
+      background-color: var(--medium-gray);
+      padding: 25px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 30px;
+      border: 1px solid var(--gray-color);
+    }
+
+    .verify-tabs {
+      display: flex;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--gray-color);
+    }
+
+    .tab-btn {
+      padding: 12px 20px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-weight: 500;
+      color: var(--text-light);
+      position: relative;
+    }
+
+    .tab-btn.active {
+      color: var(--primary-color);
+    }
+
+    .tab-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background-color: var(--primary-color);
+    }
+
+    .verify-tab-content {
+      display: none;
+    }
+
+    .verify-tab-content.active {
+      display: block;
+    }
+
+    .qr-scanner {
+      text-align: center;
+      padding: 20px;
+      border: 2px dashed var(--gray-color);
+      border-radius: var(--border-radius);
+      margin-bottom: 20px;
+    }
+
+    .qr-placeholder {
+      padding: 20px;
+    }
+
+    .qr-placeholder i {
+      font-size: 50px;
+      color: var(--text-light);
+      margin-bottom: 15px;
+    }
+
+    .verification-result {
+      background-color: var(--medium-gray);
+      padding: 25px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--gray-color);
+    }
+
+    /* Alert Filters */
+    .alert-filters {
+      position: relative;
+    }
+
+    .filter-select {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      padding: 10px 35px 10px 15px;
+      border: 1px solid var(--primary-color);
+      border-radius: var(--border-radius);
+      background-color: var(--darker-color);
+      color: var(--text-color);
+      font-size: 14px;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: var(--shadow);
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2300FF7F'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      background-size: 15px;
+    }
+
+    .filter-select:focus {
+      outline: none;
+      border-color: var(--secondary-color);
+      box-shadow: 0 0 0 2px rgba(255, 153, 0, 0.3);
+    }
+
+    .filter-select:hover {
+      border-color: var(--secondary-color);
+    }
+
+    .filter-select option {
+      background-color: var(--darker-color);
+      color: var(--text-color);
+      padding: 10px;
+    }
+
+    /* Footer */
+    .app-footer {
+      grid-area: footer;
+      background-color: var(--darker-color);
+      border-top: 1px solid var(--gray-color);
+      padding: 15px 20px;
+    }
+
+    .footer-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 20px;
+    }
+
+    .footer-links a {
+      color: var(--text-light);
+      text-decoration: none;
+      font-size: 13px;
+      transition: var(--transition);
+    }
+
+    .footer-links a:hover {
+      color: var(--primary-color);
+    }
+
+    .footer-copyright {
+      color: var(--text-light);
+      font-size: 13px;
+    }
+
+    /* Utilitaires */
+    .success {
+      color: var(--primary-color);
+    }
+
+    .error {
+      color: var(--danger-color);
+    }
+
+    .info-box {
+      background-color: rgba(0, 255, 127, 0.1);
+      border-left: 4px solid var(--primary-color);
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    .info-box i {
+      color: var(--primary-color);
+      margin-right: 8px;
+    }
+
+    .info-box p {
+      margin: 5px 0 0 0;
+      display: inline;
+    }
+
+    .no-alerts {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-light);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      body {
+        grid-template-areas:
+          "topbar"
+          "content"
+          "footer";
+        grid-template-columns: 1fr;
+      }
+      
+      .side-menu {
+        display: none;
+      }
+      
+      .search-bar {
+        max-width: 70%;
+      }
+      
+      .alerts-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .result-details {
+        flex-direction: column;
+      }
+      
+      .qr-container, .hash-details {
+        min-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Barre supérieure -->
+  <div class="top-bar">
+    <div class="search-bar">
+      <i class="fas fa-search"></i>
+      <input type="text" placeholder="Rechercher des alertes...">
+    </div>
+    
+    <div class="user-actions">
+      <button class="icon-btn notification-btn">
+        <i class="fas fa-bell"></i>
+        <span class="badge">3</span>
+      </button>
+      <button class="icon-btn user-btn">
+        <i class="fas fa-user-circle"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Menu latéral -->
+  <nav class="side-menu">
+    <div class="menu-header">
+      <h1><i class="fas fa-bolt"></i> InfoRelay</h1>
+    </div>
+    
+    <ul class="menu-items">
+      <li class="active">
+        <a href="#">
+          <i class="fas fa-home"></i>
+          <span>Tableau de bord</span>
+        </a>
+      </li>
+      <li>
+        <a href="#">
+          <i class="fas fa-map-marked-alt"></i>
+          <span>Carte des alertes</span>
+        </a>
+      </li>
+      <li>
+        <a href="#">
+          <i class="fas fa-bell"></i>
+          <span>Mes alertes</span>
+        </a>
+      </li>
+      <li>
+        <a href="#">
+          <i class="fas fa-users"></i>
+          <span>Communauté</span>
+        </a>
+      </li>
+      <li>
+        <a href="#">
+          <i class="fas fa-cog"></i>
+          <span>Paramètres</span>
+        </a>
+      </li>
+    </ul>
+    
+    <div class="menu-footer">
+      <button id="create-alert-btn" class="btn btn-primary btn-block">
+        <i class="fas fa-plus"></i> Créer une alerte
+      </button>
+    </div>
+  </nav>
+
+  <!-- Contenu principal -->
+  <main class="main-content">
+    <div class="app-container">
+      <!-- Écran 1: Liste des alertes -->
+      <div id="alerts-screen" class="screen active">
+        <div class="page-header">
+          <h2><i class="fas fa-bell"></i> Alertes récentes</h2>
+          <div class="alert-filters">
+            <select id="alert-filter" class="filter-select">
+              <option value="all">Toutes les alertes</option>
+              <option value="urgent">Urgentes</option>
+              <option value="warning">Avertissements</option>
+              <option value="info">Informations</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="actions">
+          <button id="verify-alert-btn" class="btn btn-secondary">
+            <i class="fas fa-check-circle"></i> Vérifier une alerte
+          </button>
+        </div>
+        
+        <div id="alerts-container" class="alerts-grid">
+          <!-- Les alertes seront chargées ici dynamiquement -->
+        </div>
+      </div>
+      
+      <!-- Écran 2: Création d'alerte -->
+      <div id="create-alert-screen" class="screen">
+        <div class="page-header">
+          <button id="back-to-alerts" class="btn btn-back">
+            <i class="fas fa-arrow-left"></i> Retour
+          </button>
+          <h2><i class="fas fa-plus-circle"></i> Créer une nouvelle alerte</h2>
+        </div>
+        
+        <form id="alert-form" class="alert-form">
+          <div class="form-group">
+            <label for="alert-location"><i class="fas fa-map-marker-alt"></i> Lieu</label>
+            <input type="text" id="alert-location" required placeholder="Ex: Rue des écoles, Cotonou">
+          </div>
+          
+          <div class="form-group">
+            <label for="alert-type"><i class="fas fa-exclamation-triangle"></i> Type d'alerte</label>
+            <select id="alert-type" required>
+              <option value="">Sélectionnez un type</option>
+              <option value="urgent">🔴 Urgence</option>
+              <option value="inondation">🌊 Inondation</option>
+              <option value="route-coupee">🚧 Route coupée</option>
+              <option value="vol">👮 Vol/Aggression</option>
+              <option value="incendie">🔥 Incendie</option>
+              <option value="manifestation">📢 Manifestation</option>
+              <option value="info">ℹ️ Information</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="alert-message"><i class="fas fa-comment-alt"></i> Message</label>
+            <textarea id="alert-message" required placeholder="Décrivez l'alerte en détails..."></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label for="alert-source"><i class="fas fa-user-tag"></i> Source</label>
+            <input type="text" id="alert-source" required placeholder="Ex: Mairie de Cotonou, Citoyen, ONG XYZ">
+          </div>
+          
+          <div class="form-group">
+            <label><i class="fas fa-clock"></i> Date/Heure</label>
+            <input type="text" id="alert-timestamp" readonly>
+          </div>
+          
+          <button type="submit" class="btn btn-primary btn-block">
+            <i class="fas fa-bolt"></i> Signer et publier via Lightning
+          </button>
+        </form>
+        
+        <div id="alert-result" class="alert-result" style="display: none;">
+          <h3><i class="fas fa-check-circle success"></i> Alerte publiée avec succès</h3>
+          
+          <div class="result-details">
+            <div class="qr-container">
+              <h4>QR Code de l'alerte</h4>
+              <img id="alert-qr-code" src="" alt="QR Code">
+              <button id="download-qr" class="btn btn-secondary">
+                <i class="fas fa-download"></i> Télécharger
+              </button>
+            </div>
+            
+            <div class="hash-details">
+              <h4>Données techniques</h4>
+              
+              <div class="tech-detail">
+                <label>Signature Lightning:</label>
+                <textarea id="alert-signature" readonly></textarea>
+                <button class="btn-copy" data-target="alert-signature">
+                  <i class="fas fa-copy"></i> Copier
+                </button>
+              </div>
+              
+              <div class="tech-detail">
+                <label>Public Key:</label>
+                <textarea id="alert-pubkey" readonly></textarea>
+                <button class="btn-copy" data-target="alert-pubkey">
+                  <i class="fas fa-copy"></i> Copier
+                </button>
+              </div>
+              
+              <div class="tech-detail">
+                <label>Données complètes:</label>
+                <textarea id="alert-full-data" readonly></textarea>
+                <button class="btn-copy" data-target="alert-full-data">
+                  <i class="fas fa-copy"></i> Copier
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Écran 3: Vérification d'alerte -->
+      <div id="verify-alert-screen" class="screen">
+        <div class="page-header">
+          <button id="back-to-alerts-from-verify" class="btn btn-back">
+            <i class="fas fa-arrow-left"></i> Retour
+          </button>
+          <h2><i class="fas fa-check-double"></i> Vérifier une alerte</h2>
+        </div>
+        
+        <div class="verify-options">
+          <div class="verify-tabs">
+            <button class="tab-btn active" data-tab="input"><i class="fas fa-keyboard"></i> Saisie manuelle</button>
+            <button class="tab-btn" data-tab="qr"><i class="fas fa-qrcode"></i> Scanner QR Code</button>
+          </div>
+          
+          <div id="input-tab" class="verify-tab-content active">
+            <div class="form-group">
+              <label for="alert-data">
+                <i class="fas fa-paste"></i> Coller les données de l'alerte :
+              </label>
+              <textarea id="alert-data" placeholder="Collez soit :
+                - Le JSON complet de l'alerte (avec fullMessage, signature et pubkey)
+                OU
+                - Juste la signature (nous tenterons de retrouver l'alerte)"></textarea>
+              
+              <div class="info-box">
+                <i class="fas fa-info-circle"></i>
+                <p>Vous pouvez obtenir ces données en cliquant sur "Détails" dans la liste des alertes</p>
+              </div>
+            </div>
+            <button id="verify-alert-manually" class="btn btn-primary btn-block">
+              <i class="fas fa-satellite-dish"></i> Vérifier
+            </button>
+          </div>
+          
+          <div id="qr-tab" class="verify-tab-content">
+            <div class="qr-scanner">
+              <video id="qr-video" width="100%" height="300" style="border: 1px solid var(--gray-color); display: none;"></video>
+              <canvas id="qr-canvas" style="display: none;"></canvas>
+              
+              <div class="qr-placeholder">
+                <i class="fas fa-qrcode"></i>
+                <p>Scanner le QR Code de l'alerte</p>
+                <button id="start-scanner" class="btn btn-primary">
+                  <i class="fas fa-camera"></i> Démarrer le scanner
+                </button>
+                <button id="stop-scanner" class="btn btn-secondary" style="display: none;">
+                  <i class="fas fa-stop-circle"></i> Arrêter le scanner
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div id="verification-result" class="verification-result" style="display: none;">
+          <h3 id="verification-status"><i class="fas fa-spinner fa-spin"></i> Vérification en cours...</h3>
+          
+          <div class="alert-details">
+            <h4>Détails de l'alerte</h4>
+            <p><strong>Type:</strong> <span id="verified-type"></span></p>
+            <p><strong>Lieu:</strong> <span id="verified-location"></span></p>
+            <p><strong>Message:</strong> <span id="verified-message"></span></p>
+            <p><strong>Source:</strong> <span id="verified-source"></span></p>
+            <p><strong>Date/Heure:</strong> <span id="verified-timestamp"></span></p>
+            <p><strong>Signature valide:</strong> <span id="verified-signature"></span></p>
+            <p><strong>Hash:</strong> <span id="verified-hash"></span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Pied de page -->
+  <footer class="app-footer">
+    <div class="footer-content">
+      <div class="footer-links">
+        <a href="#">Conditions d'utilisation</a>
+        <a href="#">Politique de confidentialité</a>
+        <a href="#">Aide</a>
+        <a href="#">À propos</a>
+      </div>
+      <div class="footer-copyright">
+        © 2023 InfoRelay - Tous droits réservés
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Éléments de l'interface
+      const createAlertBtn = document.getElementById('create-alert-btn');
+      const verifyAlertBtn = document.getElementById('verify-alert-btn');
+      const backToAlertsBtn = document.getElementById('back-to-alerts');
+      const backToAlertsFromVerifyBtn = document.getElementById('back-to-alerts-from-verify');
+      const alertForm = document.getElementById('alert-form');
+      const verifyAlertManuallyBtn = document.getElementById('verify-alert-manually');
+      const startScannerBtn = document.getElementById('start-scanner');
+      const stopScannerBtn = document.getElementById('stop-scanner');
+      const downloadQrBtn = document.getElementById('download-qr');
+      const alertFilter = document.getElementById('alert-filter');
+      
+      // Écrans
+      const alertsScreen = document.getElementById('alerts-screen');
+      const createAlertScreen = document.getElementById('create-alert-screen');
+      const verifyAlertScreen = document.getElementById('verify-alert-screen');
+      
+      // Onglets de vérification
+      const tabBtns = document.querySelectorAll('.tab-btn');
+      const tabContents = document.querySelectorAll('.verify-tab-content');
+      
+      // Variables pour le scanner QR
+      let qrScannerActive = false;
+      let videoStream = null;
+
+      // Fonction de notification moderne
+      function showNotification(message, isError = false) {
+        const notification = document.createElement('div');
+        notification.className = 'notification';
+        notification.style.position = 'fixed';
+        notification.style.top = '20px';
+        notification.style.left = '50%';
+        notification.style.transform = 'translateX(-50%)';
+        notification.style.padding = '12px 24px';
+        notification.style.borderRadius = 'var(--border-radius)';
+        notification.style.zIndex = '1000';
+        notification.style.color = 'var(--light-color)';
+        notification.style.backgroundColor = isError ? 'var(--danger-color)' : 'var(--primary-color)';
+        notification.style.boxShadow = 'var(--shadow)';
+        notification.style.display = 'flex';
+        notification.style.alignItems = 'center';
+        notification.style.gap = '10px';
+        notification.style.fontWeight = '500';
+        notification.style.animation = 'fadeIn 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)';
+        
+        const icon = document.createElement('i');
+        icon.className = isError ? 'fas fa-exclamation-circle' : 'fas fa-check-circle';
+        
+        notification.appendChild(icon);
+        notification.appendChild(document.createTextNode(message));
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+          notification.style.animation = 'fadeOut 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)';
+          setTimeout(() => {
+            document.body.removeChild(notification);
+          }, 300);
+        }, 3000);
+      }
+
+      // Charger les alertes au démarrage
+      loadAlerts();
+      
+      // Gestion des événements
+      createAlertBtn.addEventListener('click', () => showScreen('create-alert'));
+      verifyAlertBtn.addEventListener('click', () => showScreen('verify-alert'));
+      backToAlertsBtn.addEventListener('click', () => showScreen('alerts'));
+      backToAlertsFromVerifyBtn.addEventListener('click', () => showScreen('alerts'));
+      
+      // Gestion des onglets de vérification
+      tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const tabId = btn.getAttribute('data-tab');
+          switchTab(tabId);
+        });
+      });
+      
+      // Filtrage des alertes
+      alertFilter.addEventListener('change', (e) => {
+        filterAlerts(e.target.value);
+      });
+      
+      // Soumission du formulaire d'alerte
+      alertForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const type = document.getElementById('alert-type').value;
+        const location = document.getElementById('alert-location').value;
+        const message = document.getElementById('alert-message').value;
+        const source = document.getElementById('alert-source').value;
+        const submitBtn = alertForm.querySelector('button[type="submit"]');
+        let originalBtnText = submitBtn.innerHTML;
+        
+        try {
+
+          submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Création en cours...';
+          submitBtn.disabled = true;
+          
+          const response = await fetch('/api/alert', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ type, location, message, source }),
+          });
+          
+          if (!response.ok) throw new Error('Erreur lors de la création de l\'alerte');
+          
+          const alert = await response.json();
+          
+          // Générer le QR code
+          const qrResponse = await fetch('/api/alert/qr', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+              fullMessage: alert.fullMessage, 
+              signature: alert.signature,
+              pubkey: alert.pubkey
+            }),
+          });
+          
+          const qrData = await qrResponse.json();
+          
+          // Afficher les résultats
+          document.getElementById('alert-result').style.display = 'block';
+          document.getElementById('alert-qr-code').src = qrData.qr;
+          
+          // Afficher les données techniques
+          document.getElementById('alert-signature').textContent = alert.signature;
+          document.getElementById('alert-pubkey').textContent = alert.pubkey;
+          document.getElementById('alert-full-data').textContent = JSON.stringify({
+            fullMessage: alert.fullMessage,
+            signature: alert.signature,
+            pubkey: alert.pubkey
+          }, null, 2);
+          
+          // Recharger les alertes
+          loadAlerts();
+          showNotification('Alerte créée avec succès!');
+          
+        } catch (error) {
+          console.error('Error:', error);
+          showNotification('Erreur: ' + error.message, true);
+        } finally {
+          submitBtn.innerHTML = originalBtnText;
+          submitBtn.disabled = false;
+        }
+      });
+      
+      verifyAlertManuallyBtn.addEventListener('click', async function() {
+        const alertDataInput = document.getElementById('alert-data').value.trim();
+        
+        if (!alertDataInput) {
+          showNotification('Veuillez coller les données de l\'alerte ou la signature', true);
+          return;
+        }
+
+        try {
+          // Afficher le statut de vérification
+          document.getElementById('verification-result').style.display = 'block';
+          document.getElementById('verification-status').innerHTML = 
+            '<div class="verification-loading"><i class="fas fa-spinner fa-spin"></i> Vérification en cours...</div>';
+          document.getElementById('verification-status').className = 'verification-loading';
+
+          // Essayer de parser les données
+          let verificationData;
+          
+          // Essayer d'abord comme JSON complet
+          try {
+            const parsedData = JSON.parse(alertDataInput);
+            
+            if (parsedData.signature && parsedData.fullMessage && parsedData.pubkey) {
+              verificationData = parsedData;
+            } else if (parsedData.signature) {
+              verificationData = await findAlertBySignature(parsedData.signature);
+            } else {
+              throw new Error('Format JSON incomplet');
+            }
+          } catch (e) {
+            verificationData = await findAlertBySignature(alertDataInput);
+          }
+
+          // Vérification avec le backend
+          const verificationResponse = await fetch('/api/alert/verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(verificationData)
+          });
+
+          if (!verificationResponse.ok) {
+            throw new Error('Échec de la vérification côté serveur');
+          }
+
+          const verification = await verificationResponse.json();
+          const [type, location, message, source, timestamp] = verificationData.fullMessage.split('|');
+
+          // Afficher le résultat
+          if (verification.isValid) {
+            document.getElementById('verification-status').innerHTML = 
+              '<div class="verification-success"><i class="fas fa-check-circle"></i> Alerte authentique</div>';
+            document.getElementById('verification-status').className = 'verification-success';
+            
+            document.getElementById('verified-type').textContent = type || 'Non spécifié';
+            document.getElementById('verified-location').textContent = location || 'Non spécifié';
+            document.getElementById('verified-message').textContent = message || 'Non spécifié';
+            document.getElementById('verified-source').textContent = source || 'Non spécifié';
+            document.getElementById('verified-timestamp').textContent = timestamp ? new Date(timestamp).toLocaleString() : 'Non spécifié';
+            document.getElementById('verified-signature').textContent = 'Oui (validée par LND)';
+            document.getElementById('verified-hash').textContent = verificationData.signature.substring(0, 24) + '...';
+            
+            showNotification('Alerte vérifiée avec succès!');
+          } else {
+            document.getElementById('verification-status').innerHTML = 
+              '<div class="verification-error"><i class="fas fa-times-circle"></i> Alerte invalide</div>';
+            document.getElementById('verification-status').className = 'verification-error';
+            showNotification('La signature ne correspond pas au message', true);
+          }
+
+        } catch (error) {
+          console.error('Erreur de vérification:', error);
+          document.getElementById('verification-status').innerHTML = 
+            `<div class="verification-error"><i class="fas fa-times-circle"></i> Échec de vérification: ${error.message}</div>`;
+          document.getElementById('verification-status').className = 'verification-error';
+          
+          if (error.message.includes('incomplet')) {
+            showNotification(`Astuce: Vous devez fournir:
+1. Soit le JSON complet (avec signature, message et clé publique)
+2. Soit juste la signature (pour les alertes déjà enregistrées)`, true);
+          } else {
+            showNotification(`Erreur: ${error.message}`, true);
+          }
+        }
+      });
+
+      // Fonction helper pour trouver une alerte par sa signature
+      async function findAlertBySignature(signature) {
+        try {
+          const response = await fetch('/api/alerts');
+          if (!response.ok) throw new Error('Impossible de charger les alertes');
+          
+          const alerts = await response.json();
+          const foundAlert = alerts.find(a => a.signature === signature);
+          
+          if (!foundAlert) {
+            throw new Error('Aucune alerte enregistrée ne correspond à cette signature. Essayez de fournir le JSON complet.');
+          }
+          
+          return {
+            fullMessage: foundAlert.fullMessage,
+            signature: foundAlert.signature,
+            pubkey: foundAlert.pubkey
+          };
+        } catch (error) {
+          throw new Error(`Impossible de retrouver l'alerte: ${error.message}`);
+        }
+      }
+      
+      // Scanner QR code
+      startScannerBtn.addEventListener('click', startQrScanner);
+      stopScannerBtn.addEventListener('click', stopQrScanner);
+      
+      // Télécharger QR code
+      downloadQrBtn.addEventListener('click', function() {
+        const qrImg = document.getElementById('alert-qr-code');
+        const link = document.createElement('a');
+        link.href = qrImg.src;
+        link.download = 'alerte-info-relay.png';
+        link.click();
+        showNotification('QR Code téléchargé!');
+      });
+      
+      // Fonctions utilitaires
+      function showScreen(screen) {
+        alertsScreen.classList.remove('active');
+        createAlertScreen.classList.remove('active');
+        verifyAlertScreen.classList.remove('active');
+        
+        switch(screen) {
+          case 'create-alert':
+            createAlertScreen.classList.add('active');
+            document.getElementById('alert-result').style.display = 'none';
+            document.getElementById('alert-form').reset();
+            break;
+          case 'verify-alert':
+            verifyAlertScreen.classList.add('active');
+            document.getElementById('verification-result').style.display = 'none';
+            document.getElementById('alert-data').value = '';
+            break;
+          default:
+            alertsScreen.classList.add('active');
+            stopQrScanner();
+            break;
+        }
+      }
+      
+      function switchTab(tabId) {
+        tabBtns.forEach(btn => btn.classList.remove('active'));
+        tabContents.forEach(content => content.classList.remove('active'));
+        
+        document.querySelector(`.tab-btn[data-tab="${tabId}"]`).classList.add('active');
+        document.getElementById(`${tabId}-tab`).classList.add('active');
+        
+        if (tabId === 'qr' && !qrScannerActive) {
+          startQrScanner();
+        } else if (tabId !== 'qr') {
+          stopQrScanner();
+        }
+      }
+      
+      function filterAlerts(type) {
+        const alertCards = document.querySelectorAll('.alert-card');
+        
+        alertCards.forEach(card => {
+          const isUrgent = card.classList.contains('urgent');
+          const isWarning = card.classList.contains('warning');
+          const isInfo = card.classList.contains('info');
+          
+          switch(type) {
+            case 'urgent':
+              card.style.display = isUrgent ? 'block' : 'none';
+              break;
+            case 'warning':
+              card.style.display = isWarning ? 'block' : 'none';
+              break;
+            case 'info':
+              card.style.display = isInfo ? 'block' : 'none';
+              break;
+            default:
+              card.style.display = 'block';
+          }
+        });
+      }
+      
+      async function loadAlerts() {
+        try {
+          const response = await fetch('/api/alerts');
+          if (!response.ok) throw new Error('Erreur lors du chargement des alertes');
+          
+          const alerts = await response.json();
+          renderAlerts(alerts);
+        } catch (error) {
+          console.error('Error:', error);
+          showNotification('Erreur lors du chargement des alertes', true);
+          renderAlerts([]);
+        }
+      }
+      
+      function renderAlerts(alerts) {
+        const container = document.getElementById('alerts-container');
+        container.innerHTML = '';
+        
+        if (alerts.length === 0) {
+          container.innerHTML = '<div class="no-alerts"><i class="fas fa-info-circle"></i> Aucune alerte disponible pour le moment</div>';
+          return;
+        }
+        
+        alerts.forEach(alert => {
+          const [type, location, message, source, timestamp] = alert.fullMessage.split('|');
+          
+          const alertCard = document.createElement('div');
+          alertCard.className = 'alert-card';
+          
+          if (type.toLowerCase().includes('urgence') || type.toLowerCase().includes('incendie') || type.toLowerCase().includes('vol')) {
+            alertCard.classList.add('urgent');
+          } else if (type.toLowerCase().includes('avertissement') || type.toLowerCase().includes('route')) {
+            alertCard.classList.add('warning');
+          } else {
+            alertCard.classList.add('info');
+          }
+          
+          let iconClass = 'fas fa-exclamation-triangle';
+          if (type.includes('🔥')) iconClass = 'fas fa-fire';
+          else if (type.includes('🌊')) iconClass = 'fas fa-water';
+          else if (type.includes('🚧')) iconClass = 'fas fa-cone-striped';
+          else if (type.includes('👮')) iconClass = 'fas fa-police-box';
+          else if (type.includes('📢')) iconClass = 'fas fa-bullhorn';
+          
+          alertCard.innerHTML = `
+            <div class="alert-header">
+              <div class="alert-icon"><i class="${iconClass}"></i></div>
+              <div class="alert-title">${type}</div>
+            </div>
+            <div class="alert-body">
+              <div class="alert-detail">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>${location}</span>
+              </div>
+              <div class="alert-detail">
+                <i class="fas fa-user-tag"></i>
+                <span>${source}</span>
+              </div>
+              <div class="alert-detail">
+                <i class="fas fa-clock"></i>
+                <span>${new Date(timestamp).toLocaleString()}</span>
+              </div>
+              <div class="alert-detail">
+                <i class="fas fa-comment-alt"></i>
+                <span>${message.substring(0, 50)}${message.length > 50 ? '...' : ''}</span>
+              </div>
+            </div>
+            <div class="alert-footer">
+              <button class="btn btn-secondary view-qr" data-id="${alert.id}">
+                <i class="fas fa-qrcode"></i> QR Code
+              </button>
+              <button class="btn btn-primary view-details" data-id="${alert.id}">
+                <i class="fas fa-search"></i> Détails
+              </button>
+            </div>
+          `;
+          
+          container.appendChild(alertCard);
+        });
+        
+        document.querySelectorAll('.view-qr').forEach(btn => {
+          btn.addEventListener('click', function() {
+            const alertId = this.getAttribute('data-id');
+            showAlertQr(alertId);
+          });
+        });
+        
+        document.querySelectorAll('.view-details').forEach(btn => {
+          btn.addEventListener('click', function() {
+            const alertId = this.getAttribute('data-id');
+            showAlertDetails(alertId);
+          });
+        });
+      }
+      
+      async function showAlertQr(alertId) {
+        try {
+          const response = await fetch(`/api/alert/${alertId}`);
+          if (!response.ok) throw new Error('Alerte non trouvée');
+          
+          const alert = await response.json();
+          
+          const qrResponse = await fetch('/api/alert/qr', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+              fullMessage: alert.fullMessage, 
+              signature: alert.signature,
+              pubkey: alert.pubkey
+            }),
+          });
+          
+          const qrData = await qrResponse.json();
+          
+          const modal = document.createElement('div');
+          modal.style.position = 'fixed';
+          modal.style.top = '0';
+          modal.style.left = '0';
+          modal.style.width = '100%';
+          modal.style.height = '100%';
+          modal.style.backgroundColor = 'rgba(0,0,0,0.9)';
+          modal.style.display = 'flex';
+          modal.style.justifyContent = 'center';
+          modal.style.alignItems = 'center';
+          modal.style.zIndex = '1000';
+          
+          modal.innerHTML = `
+            <div style="background: var(--darker-color); padding: 25px; border-radius: var(--border-radius); 
+                        border: 1px solid var(--primary-color); box-shadow: var(--shadow); max-width: 90%; width: 400px;
+                        text-align: center;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="margin: 0; color: var(--primary-color);">
+                  <i class="fas fa-qrcode"></i> QR Code de vérification
+                </h3>
+                <button id="close-qr-modal" style="background: none; border: none; color: var(--text-light); font-size: 20px; cursor: pointer;">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+              <img src="${qrData.qr}" style="width: 250px; height: 250px; margin: 0 auto; display: block; border: 2px solid var(--primary-color);">
+              <p style="color: var(--text-light); margin-top: 20px;">Scannez ce QR code pour vérifier cette alerte</p>
+              <button id="download-qr-modal" class="btn btn-primary" style="margin-top: 20px;">
+                <i class="fas fa-download"></i> Télécharger
+              </button>
+            </div>
+          `;
+          
+          document.body.appendChild(modal);
+          
+          document.getElementById('close-qr-modal').addEventListener('click', () => {
+            document.body.removeChild(modal);
+          });
+          
+          document.getElementById('download-qr-modal').addEventListener('click', () => {
+            const link = document.createElement('a');
+            link.href = qrData.qr;
+            link.download = `alerte-${alertId}-qr.png`;
+            link.click();
+            showNotification('QR Code téléchargé!');
+          });
+          
+        } catch (error) {
+          console.error('Error:', error);
+          showNotification('Erreur: ' + error.message, true);
+        }
+      }
+      
+      async function showAlertDetails(alertId) {
+        try {
+          const response = await fetch(`/api/alert/${alertId}`);
+          if (!response.ok) throw new Error('Alerte non trouvée');
+          
+          const alert = await response.json();
+          const [type, location, message, source, timestamp] = alert.fullMessage.split('|');
+          
+          const modal = document.createElement('div');
+          modal.style.position = 'fixed';
+          modal.style.top = '0';
+          modal.style.left = '0';
+          modal.style.width = '100%';
+          modal.style.height = '100%';
+          modal.style.backgroundColor = 'rgba(0,0,0,0.9)';
+          modal.style.display = 'flex';
+          modal.style.justifyContent = 'center';
+          modal.style.alignItems = 'center';
+          modal.style.zIndex = '1000';
+          modal.style.overflowY = 'auto';
+          modal.style.padding = '20px 0';
+          
+          modal.innerHTML = `
+            <div style="background: var(--darker-color); padding: 25px; border-radius: var(--border-radius); 
+                        border: 1px solid var(--primary-color); box-shadow: var(--shadow); max-width: 90%; width: 600px;
+                        margin: 20px 0;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="margin: 0; color: var(--primary-color);">
+                  <i class="fas fa-info-circle"></i> Détails complets de l'alerte
+                </h3>
+                <button id="close-details-modal" style="background: none; border: none; color: var(--text-light); font-size: 20px; cursor: pointer;">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+              
+              <div style="display: grid; grid-template-columns: 120px 1fr; gap: 10px; margin-bottom: 20px;">
+                <div style="color: var(--primary-color); font-weight: 500;"><i class="fas fa-tag"></i> Type:</div>
+                <div>${type}</div>
+                
+                <div style="color: var(--primary-color); font-weight: 500;"><i class="fas fa-map-marker-alt"></i> Lieu:</div>
+                <div>${location}</div>
+                
+                <div style="color: var(--primary-color); font-weight: 500;"><i class="fas fa-comment"></i> Message:</div>
+                <div>${message}</div>
+                
+                <div style="color: var(--primary-color); font-weight: 500;"><i class="fas fa-user"></i> Source:</div>
+                <div>${source}</div>
+                
+                <div style="color: var(--primary-color); font-weight: 500;"><i class="fas fa-clock"></i> Date/Heure:</div>
+                <div>${new Date(timestamp).toLocaleString()}</div>
+              </div>
+              
+              <h4 style="color: var(--primary-color); margin-top: 25px; border-bottom: 1px solid var(--gray-color); padding-bottom: 8px;">
+                <i class="fas fa-code"></i> Données techniques
+              </h4>
+              
+              <div style="margin-bottom: 15px;">
+                <div style="color: var(--primary-color); margin-bottom: 5px;">
+                  <i class="fas fa-signature"></i> Signature:
+                </div>
+                <textarea style="width: 100%; height: 80px; padding: 10px; background: var(--dark-color); 
+                            color: var(--text-color); border: 1px solid var(--gray-color); border-radius: 4px; 
+                            font-family: monospace; resize: none;" readonly>${alert.signature}</textarea>
+                <button class="btn btn-secondary btn-copy" data-text="${alert.signature}" style="margin-top: 5px;">
+                  <i class="fas fa-copy"></i> Copier la signature
+                </button>
+              </div>
+              
+              <div style="margin-bottom: 15px;">
+                <div style="color: var(--primary-color); margin-bottom: 5px;">
+                  <i class="fas fa-key"></i> Clé publique:
+                </div>
+                <textarea style="width: 100%; height: 80px; padding: 10px; background: var(--dark-color); 
+                            color: var(--text-color); border: 1px solid var(--gray-color); border-radius: 4px; 
+                            font-family: monospace; resize: none;" readonly>${alert.pubkey}</textarea>
+                <button class="btn btn-secondary btn-copy" data-text="${alert.pubkey}" style="margin-top: 5px;">
+                  <i class="fas fa-copy"></i> Copier la clé publique
+                </button>
+              </div>
+              
+              <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+                <button id="view-qr-from-details" class="btn btn-primary">
+                  <i class="fas fa-qrcode"></i> Voir QR Code
+                </button>
+              </div>
+            </div>
+          `;
+          
+          document.body.appendChild(modal);
+          
+          modal.querySelectorAll('.btn-copy').forEach(btn => {
+            btn.addEventListener('click', function() {
+              const textToCopy = this.getAttribute('data-text');
+              navigator.clipboard.writeText(textToCopy).then(() => {
+                showNotification('Texte copié dans le presse-papier!');
+              }).catch(err => {
+                showNotification('Erreur lors de la copie', true);
+                console.error('Erreur de copie:', err);
+              });
+            });
+          });
+          
+          document.getElementById('close-details-modal').addEventListener('click', () => {
+            document.body.removeChild(modal);
+          });
+          
+          document.getElementById('view-qr-from-details').addEventListener('click', () => {
+            document.body.removeChild(modal);
+            showAlertQr(alertId);
+          });
+          
+        } catch (error) {
+          console.error('Error:', error);
+          showNotification('Erreur: ' + error.message, true);
+        }
+      }
+      
+      function startQrScanner() {
+        const video = document.getElementById('qr-video');
+        const canvas = document.getElementById('qr-canvas');
+        const placeholder = document.querySelector('.qr-placeholder');
+        
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+          .then(function(stream) {
+            videoStream = stream;
+            video.srcObject = stream;
+            video.setAttribute('playsinline', true);
+            video.play();
+            
+            startScannerBtn.style.display = 'none';
+            stopScannerBtn.style.display = 'inline-block';
+            placeholder.style.display = 'none';
+            video.style.display = 'block';
+            
+            qrScannerActive = true;
+            requestAnimationFrame(tick);
+          })
+          .catch(function(err) {
+            console.error('Error accessing camera:', err);
+            showNotification('Impossible d\'accéder à la caméra: ' + err.message, true);
+          });
+        
+        function tick() {
+          if (!qrScannerActive) return;
+          
+          if (video.readyState === video.HAVE_ENOUGH_DATA) {
+            canvas.height = video.videoHeight;
+            canvas.width = video.videoWidth;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const code = jsQR(imageData.data, imageData.width, imageData.height, {
+              inversionAttempts: 'dontInvert',
+            });
+            
+            if (code) {
+              try {
+                const alertData = JSON.parse(code.data);
+                document.getElementById('alert-data').value = JSON.stringify(alertData, null, 2);
+                stopQrScanner();
+                document.getElementById('verify-alert-manually').click();
+              } catch (e) {
+                console.error('Error parsing QR code:', e);
+              }
+            }
+          }
+          
+          requestAnimationFrame(tick);
+        }
+      }
+      
+      function stopQrScanner() {
+        if (!qrScannerActive) return;
+        
+        qrScannerActive = false;
+        const video = document.getElementById('qr-video');
+        const placeholder = document.querySelector('.qr-placeholder');
+        
+        if (videoStream) {
+          videoStream.getTracks().forEach(track => track.stop());
+          videoStream = null;
+        }
+        
+        startScannerBtn.style.display = 'inline-block';
+        stopScannerBtn.style.display = 'none';
+        placeholder.style.display = 'block';
+        video.style.display = 'none';
+      }
+      
+      function updateTimestamp() {
+        document.getElementById('alert-timestamp').value = new Date().toLocaleString();
+      }
+      
+      setInterval(updateTimestamp, 1000);
+      updateTimestamp();
+    });
+  </script>
+</body>
+</html>
