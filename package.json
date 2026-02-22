@@ -21,7 +21,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",
     "express": "^4.21.2",
-    "ln-service": "^57.25.2",
+    "ln-service": "^58.0.2",
     "qrcode": "^1.5.4"
   },
   "devDependencies": {
